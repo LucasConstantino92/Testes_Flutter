@@ -1,66 +1,61 @@
-import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 
 class BarcodeScanner extends StatefulWidget {
   const BarcodeScanner({Key? key}) : super(key: key);
 
   @override
-  _BarcodeScannerState createState() => _BarcodeScannerState();
+  State<BarcodeScanner> createState() => _BarcodeScannerState();
 }
 
 class _BarcodeScannerState extends State<BarcodeScanner> {
-  late CameraController _cameraController;
-  late Future<void> _cameraInitFuture;
+  String ticket = '';
+  List<String> tickets = [];
 
-  @override
-  void initState() {
-    super.initState();
-
-    _cameraInitFuture = _initializeCamera();
-  }
-
-  Future<void> _initializeCamera() async {
-    final cameras = await availableCameras();
-    final firstCamera = cameras.first;
-
-    _cameraController = CameraController(firstCamera, ResolutionPreset.medium);
-
-    await _cameraController.initialize();
+  readQRCode() async {
+    String code = await FlutterBarcodeScanner.scanBarcode(
+      "#FFFFFF",
+      "Cancelar",
+      false,
+      ScanMode.QR,
+    );
+    setState(() => ticket = code != '-1' ? code : 'Não validado');
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Leitor de Código de Barras'),
+        title: Text("Leitor de Código de Barras"),
+        leading: IconButton(
+          onPressed: () {
+            Navigator.pop(context);
+          },
+          icon: Icon(Icons.arrow_back),
+        ),
       ),
-      body: FutureBuilder<void>(
-        future: _initializeCamera(),
-        builder: (BuildContext context, AsyncSnapshot<void> snapshot) {
-          if (snapshot.connectionState == ConnectionState.done) {
-            return _buildBarcodeScanner();
-          } else {
-            return const Center(child: CircularProgressIndicator());
-          }
-        },
-      ),
-    );
-  }
-
-  Widget _buildBarcodeScanner() {
-    return Container(
-      child: Center(
-        child: AspectRatio(
-          aspectRatio: _cameraController.value.aspectRatio,
-          child: CameraPreview(_cameraController),
+      body: SizedBox(
+        width: MediaQuery.of(context).size.width,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            if (ticket != '')
+              Padding(
+                padding: const EdgeInsets.only(bottom: 24.0),
+                child: Text(
+                  'Ticket: $ticket',
+                  style: const TextStyle(fontSize: 20),
+                ),
+              ),
+            ElevatedButton.icon(
+              onPressed: readQRCode,
+              icon: const Icon(Icons.qr_code),
+              label: const Text('Validar'),
+            ),
+          ],
         ),
       ),
     );
-  }
-
-  @override
-  void dispose() {
-    _cameraController.dispose();
-    super.dispose();
   }
 }
