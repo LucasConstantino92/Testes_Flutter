@@ -32,7 +32,7 @@ class MyHome extends StatelessWidget {
       appBar: AppBar(
         title: const Text("Teste de Funcionalidades"),
       ),
-      body: Body(),
+      body: const Body(),
     );
   }
 }

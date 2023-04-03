@@ -17,7 +17,7 @@ class _BarcodeScannerState extends State<BarcodeScanner> {
       "#FFFFFF",
       "Cancelar",
       false,
-      ScanMode.QR,
+      ScanMode.BARCODE,
     );
     setState(() => ticket = code != '-1' ? code : 'Não validado');
   }

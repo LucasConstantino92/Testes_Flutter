@@ -1,29 +1,59 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 
-class QrCodeScannerPage extends StatelessWidget {
-  const QrCodeScannerPage({Key? key}) : super(key: key);
+class QrCode extends StatefulWidget {
+  const QrCode({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      home: QrCode(),
-    );
-  }
+  State<QrCode> createState() => _QrCodeState();
 }
 
-class QrCode extends StatelessWidget {
-  const QrCode({Key? key}) : super(key: key);
+class _QrCodeState extends State<QrCode> {
+  String ticket = '';
+  List<String> tickets = [];
+
+  readQRCode() async {
+    String code = await FlutterBarcodeScanner.scanBarcode(
+      "#FFFFFF",
+      "Cancelar",
+      false,
+      ScanMode.QR,
+    );
+    setState(() => ticket = code != '-1' ? code : 'Não validado');
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Leitor de QR Code"),
+        title: Text("Leitor de QR Code"),
         leading: IconButton(
           onPressed: () {
             Navigator.pop(context);
           },
-          icon: const Icon(Icons.arrow_back),
+          icon: Icon(Icons.arrow_back),
+        ),
+      ),
+      body: SizedBox(
+        width: MediaQuery.of(context).size.width,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            if (ticket != '')
+              Padding(
+                padding: const EdgeInsets.only(bottom: 24.0),
+                child: Text(
+                  'Ticket: $ticket',
+                  style: const TextStyle(fontSize: 20),
+                ),
+              ),
+            ElevatedButton.icon(
+              onPressed: readQRCode,
+              icon: const Icon(Icons.qr_code),
+              label: const Text('Validar'),
+            ),
+          ],
         ),
       ),
     );
